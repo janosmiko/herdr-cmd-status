@@ -1,0 +1,21 @@
+id = "janosmiko.herdr-cmd-status"
+name = "herdr-cmd-status"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+description = "Running and finished icons in the Spaces sidebar for long shell commands, also over ssh and in VMs."
+platforms = ["macos", "linux"]
+
+[[startup]]
+command = ["node", "bin/watch.js", "--ensure"]
+
+# Restarts a watcher that died, the next time a workspace is selected. A plain sh
+# check keeps the cost of a workspace switch to one fork when the watcher is alive.
+[[events]]
+on = "workspace.focused"
+command = ["sh", "-c", "kill -0 \"$(cat \"$HERDR_PLUGIN_STATE_DIR/watch.pid\" 2>/dev/null)\" 2>/dev/null || exec node bin/watch.js --ensure"]
+
+[[actions]]
+id = "restart"
+title = "Command status: restart watcher"
+description = "Stop the watcher and start a new one, for example after a config.json change."
+command = ["node", "bin/watch.js", "--restart"]

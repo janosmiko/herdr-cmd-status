@@ -15,13 +15,13 @@ The shell writes a mark into the terminal title when a command starts (`⏵ make
 ## Requirements
 
 - Herdr 0.9.5 or later
-- Node.js 18 or later
+- macOS or Linux, on x86_64 or arm64. On other machines, Go 1.22 or later to build from source
 - A Nerd Font in the terminal, for the icons
 - zsh, or bash 4.4 or later, on each machine that runs commands
 
 ## Install
 
-1. Install the plugin:
+1. Install the plugin. The install downloads the release binary and checks it against the release `SHA256SUMS`:
 
    ```sh
    herdr plugin install janosmiko/herdr-cmd-status
@@ -83,7 +83,9 @@ Optional. Create `config.json` in the plugin config directory (`herdr plugin con
 make help
 ```
 
-Link a checkout with `herdr plugin link .`, then run the `restart` action after each change to `bin/` or `lib/`.
+Link a checkout with `herdr plugin link .`, then run `make restart` after each change to the Go code.
+
+To release, set `version` in `herdr-plugin.toml`, then push the tag `v<version>`. The release workflow builds the binaries that the install downloads.
 
 ## License
 

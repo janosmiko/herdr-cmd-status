@@ -11,8 +11,22 @@ import (
 	"testing"
 )
 
-// Runs scripts/install.sh against a fake release directory. PATH holds only
-// the system tools, so the script finds no Go to fall back to.
+// toolDir returns a PATH dir with only the tools that install.sh uses, so the
+// script finds no Go to fall back to. CI runners have Go in /usr/bin.
+func toolDir(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	for _, tool := range []string{"awk", "chmod", "curl", "cut", "dirname", "head", "mkdir", "mktemp", "mv", "rm", "sed", "sha256sum", "shasum", "uname"} {
+		if p, err := exec.LookPath(tool); err == nil {
+			if err := os.Symlink(p, filepath.Join(dir, tool)); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	return dir
+}
+
+// Runs scripts/install.sh against a fake release directory.
 func TestInstallScript(t *testing.T) {
 	asset := fmt.Sprintf("herdr-cmd-status-%s-%s", runtime.GOOS, runtime.GOARCH)
 	binary := []byte("#!/bin/sh\necho fake\n")
@@ -45,7 +59,7 @@ func TestInstallScript(t *testing.T) {
 
 			cmd := exec.Command("sh", filepath.Join(root, "scripts", "install.sh"))
 			cmd.Env = []string{
-				"PATH=/usr/bin:/bin",
+				"PATH=" + toolDir(t),
 				"HERDR_CMD_STATUS_BASE_URL=file://" + filepath.Dir(release),
 			}
 			out, err := cmd.CombinedOutput()
